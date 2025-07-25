@@ -1,0 +1,42 @@
+{
+  "send_groq_message_advanced.dart": {
+    "old_identifier_name": "sendGroqMessageAdvanced",
+    "new_identifier_name": "sendGroqMessageAdvanced",
+    "type": "A",
+    "is_deleted": false,
+    "current_checksum": "f169df4aa03a96c4155aac19819c26cdebc43b2ca2708e3c00a008dc9a85cb65",
+    "original_checksum": "f169df4aa03a96c4155aac19819c26cdebc43b2ca2708e3c00a008dc9a85cb65"
+  },
+  "send_groq_message.dart": {
+    "old_identifier_name": "sendGroqMessage",
+    "new_identifier_name": "sendGroqMessage",
+    "type": "A",
+    "is_deleted": false,
+    "current_checksum": "91e872a2ac4205cd855a16db3a3f6d13d7c307dbbb1e1ab2f0616ac6495ab2ed",
+    "original_checksum": "91e872a2ac4205cd855a16db3a3f6d13d7c307dbbb1e1ab2f0616ac6495ab2ed"
+  },
+  "validate_groq_setup.dart": {
+    "old_identifier_name": "validateGroqSetup",
+    "new_identifier_name": "validateGroqSetup",
+    "type": "A",
+    "is_deleted": false,
+    "current_checksum": "c8874db4e6253bbacfe3dd16f98caa9dbb2de9383dc0ffbd63ddcbb813e0fb54",
+    "original_checksum": "c8874db4e6253bbacfe3dd16f98caa9dbb2de9383dc0ffbd63ddcbb813e0fb54"
+  },
+  "custom_functions.dart": {
+    "old_identifier_name": "CustomFunctions",
+    "new_identifier_name": "CustomFunctions",
+    "type": "F",
+    "is_deleted": false,
+    "current_checksum": "415688756283460139fa2817ca006943c32a3ceb940e28ef903ca9cef86a1b08",
+    "original_checksum": "415688756283460139fa2817ca006943c32a3ceb940e28ef903ca9cef86a1b08"
+  },
+  "pubspec.yaml": {
+    "old_identifier_name": "pubspec.yaml",
+    "new_identifier_name": "pubspec.yaml",
+    "type": "D",
+    "is_deleted": false,
+    "current_checksum": "422df87ee2751726a42bb3938ec3581cac2892195a05a7d279f32b1687aab4ed",
+    "original_checksum": "422df87ee2751726a42bb3938ec3581cac2892195a05a7d279f32b1687aab4ed"
+  }
+}
