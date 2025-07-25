@@ -16,6 +16,7 @@ class GroqResponseStruct extends BaseStruct {
     bool? isAgenticModel,
     bool? success,
     String? errorMessage,
+    List<String>? executedTools,
   })  : _content = content,
         _modelUsed = modelUsed,
         _promptTokens = promptTokens,
@@ -24,7 +25,8 @@ class GroqResponseStruct extends BaseStruct {
         _timestamp = timestamp,
         _isAgenticModel = isAgenticModel,
         _success = success,
-        _errorMessage = errorMessage;
+        _errorMessage = errorMessage,
+        _executedTools = executedTools;
 
   // "content" field.
   String? _content;
@@ -97,6 +99,17 @@ class GroqResponseStruct extends BaseStruct {
 
   bool hasErrorMessage() => _errorMessage != null;
 
+  // "executedTools" field.
+  List<String>? _executedTools;
+  List<String> get executedTools => _executedTools ?? const [];
+  set executedTools(List<String>? val) => _executedTools = val;
+
+  void updateExecutedTools(Function(List<String>) updateFn) {
+    updateFn(_executedTools ??= []);
+  }
+
+  bool hasExecutedTools() => _executedTools != null;
+
   static GroqResponseStruct fromMap(Map<String, dynamic> data) =>
       GroqResponseStruct(
         content: data['content'] as String?,
@@ -108,6 +121,7 @@ class GroqResponseStruct extends BaseStruct {
         isAgenticModel: data['is_agentic_model'] as bool?,
         success: data['success'] as bool?,
         errorMessage: data['error_message'] as String?,
+        executedTools: getDataList(data['executedTools']),
       );
 
   static GroqResponseStruct? maybeFromMap(dynamic data) => data is Map
@@ -124,6 +138,7 @@ class GroqResponseStruct extends BaseStruct {
         'is_agentic_model': _isAgenticModel,
         'success': _success,
         'error_message': _errorMessage,
+        'executedTools': _executedTools,
       }.withoutNulls;
 
   @override
@@ -163,6 +178,11 @@ class GroqResponseStruct extends BaseStruct {
         'error_message': serializeParam(
           _errorMessage,
           ParamType.String,
+        ),
+        'executedTools': serializeParam(
+          _executedTools,
+          ParamType.String,
+          isList: true,
         ),
       }.withoutNulls;
 
@@ -213,6 +233,11 @@ class GroqResponseStruct extends BaseStruct {
           ParamType.String,
           false,
         ),
+        executedTools: deserializeParam<String>(
+          data['executedTools'],
+          ParamType.String,
+          true,
+        ),
       );
 
   @override
@@ -220,6 +245,7 @@ class GroqResponseStruct extends BaseStruct {
 
   @override
   bool operator ==(Object other) {
+    const listEquality = ListEquality();
     return other is GroqResponseStruct &&
         content == other.content &&
         modelUsed == other.modelUsed &&
@@ -229,7 +255,8 @@ class GroqResponseStruct extends BaseStruct {
         timestamp == other.timestamp &&
         isAgenticModel == other.isAgenticModel &&
         success == other.success &&
-        errorMessage == other.errorMessage;
+        errorMessage == other.errorMessage &&
+        listEquality.equals(executedTools, other.executedTools);
   }
 
   @override
@@ -242,7 +269,8 @@ class GroqResponseStruct extends BaseStruct {
         timestamp,
         isAgenticModel,
         success,
-        errorMessage
+        errorMessage,
+        executedTools
       ]);
 }
 

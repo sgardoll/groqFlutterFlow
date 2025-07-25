@@ -7,38 +7,55 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-import 'package:groq/groq.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-// VALIDATION FUNCTION: Test API setup and return validation result
+/// VALIDATION FUNCTION: Test API setup and return validation result
 Future<GroqResponseStruct> validateGroqSetup(
-    String apiKey, String model) async {
+  String apiKey,
+  String model,
+  SearchSettingsStruct? searchSettings,
+) async {
+  final url = Uri.parse('https://api.groq.com/openai/v1/chat/completions');
+  final headers = {
+    'Authorization': 'Bearer $apiKey',
+    'Content-Type': 'application/json',
+  };
+  final body = {
+    'model': model,
+    'messages': [
+      {'role': 'user', 'content': 'Hello, this is a test message.'},
+    ],
+    if (searchSettings != null) 'search_settings': _mapSettings(searchSettings),
+  };
+
   try {
-    final groq = Groq(
-      apiKey: apiKey,
-      model: model,
-    );
+    final res = await http.post(url, headers: headers, body: jsonEncode(body));
+    final decoded = jsonDecode(res.body);
 
-    groq.startChat();
-    GroqResponse response =
-        await groq.sendMessage("Hello, this is a test message.");
-
-    // Validate response has choices before accessing
-    if (response.choices.isEmpty) {
-      throw Exception('No response choices returned from Groq API');
+    if (res.statusCode != 200) {
+      throw Exception(decoded['error']?['message'] ?? res.body.toString());
     }
 
-    String responseContent = response.choices.first.message.content;
+    final firstChoice = decoded['choices'][0];
+    final content = firstChoice['message']['content'] ?? "(empty)";
+    final executedTools = firstChoice['message']['executed_tools'];
 
     return GroqResponseStruct(
-      content: 'Setup validated successfully. Test response: $responseContent',
-      modelUsed: response.model,
-      promptTokens: response.usage.promptTokens,
-      completionTokens: response.usage.completionTokens,
-      totalTokens: response.usage.totalTokens,
+      content: 'Setup validated successfully. Test response: $content',
+      modelUsed: decoded['model'],
+      promptTokens: decoded['usage']?['prompt_tokens'] ?? 0,
+      completionTokens: decoded['usage']?['completion_tokens'] ?? 0,
+      totalTokens: decoded['usage']?['total_tokens'] ?? 0,
       timestamp: DateTime.now().toIso8601String(),
       isAgenticModel: _isAgenticModel(model),
       success: true,
       errorMessage: '',
+      executedTools: executedTools == null
+          ? []
+          : (executedTools is List
+              ? executedTools.map((e) => e.toString()).toList()
+              : [executedTools.toString()]),
     );
   } catch (e) {
     return GroqResponseStruct(
@@ -51,16 +68,20 @@ Future<GroqResponseStruct> validateGroqSetup(
       isAgenticModel: _isAgenticModel(model),
       success: false,
       errorMessage: 'Setup validation failed: ${e.toString()}',
+      executedTools: [],
     );
   }
 }
 
-// HELPER FUNCTION: Check if model supports agentic tooling
-bool _isAgenticModel(String model) {
-  const agenticModels = {
-    'compound-beta',
-    'compound-beta-mini',
-    'kimi-k2-instruct',
-  };
-  return agenticModels.contains(model);
-}
+Map<String, dynamic> _mapSettings(SearchSettingsStruct settings) => {
+      if (settings.excludeDomains.isNotEmpty)
+        "exclude_domains": settings.excludeDomains,
+      if (settings.includeDomains.isNotEmpty)
+        "include_domains": settings.includeDomains,
+      if (settings.country.isNotEmpty) "country": settings.country,
+    };
+
+bool _isAgenticModel(String model) => const {
+      'compound-beta',
+      'compound-beta-mini',
+    }.contains(model);

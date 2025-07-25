@@ -7,28 +7,48 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-import 'package:groq/groq.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-// SIMPLE VERSION: Returns just the content string
+/// SIMPLE one-shot message; returns only the assistant's text as String.
+/// Use for commodity Q&A where token usage/executed tools aren't needed.
 Future<String> sendGroqMessage(
-    String message, String apiKey, String model) async {
+  String message,
+  String apiKey,
+  String model,
+  SearchSettingsStruct? searchSettings,
+) async {
+  final url = Uri.parse('https://api.groq.com/openai/v1/chat/completions');
+  final headers = {
+    'Authorization': 'Bearer $apiKey',
+    'Content-Type': 'application/json',
+  };
+  final body = {
+    'model': model,
+    'messages': [
+      {'role': 'user', 'content': message},
+    ],
+    if (searchSettings != null) 'search_settings': _mapSettings(searchSettings),
+  };
+
   try {
-    final groq = Groq(
-      apiKey: apiKey,
-      model: model,
-    );
+    final res = await http.post(url, headers: headers, body: jsonEncode(body));
+    final decoded = jsonDecode(res.body);
 
-    groq.startChat();
-    GroqResponse response = await groq.sendMessage(message);
-
-    // Validate response has choices before accessing
-    if (response.choices.isEmpty) {
-      throw Exception('No response choices returned from Groq API');
+    if (res.statusCode != 200) {
+      throw Exception(decoded['error']?['message'] ?? res.body.toString());
     }
 
-    return response.choices.first.message.content;
+    return decoded['choices'][0]['message']['content'] ?? '';
   } catch (e) {
-    print('Error with Groq API: $e');
-    return 'Error: Unable to get response from Groq API: ${e.toString()}';
+    return 'Groq API error: ${e.toString()}';
   }
 }
+
+Map<String, dynamic> _mapSettings(SearchSettingsStruct settings) => {
+      if (settings.excludeDomains.isNotEmpty)
+        "exclude_domains": settings.excludeDomains,
+      if (settings.includeDomains.isNotEmpty)
+        "include_domains": settings.includeDomains,
+      if (settings.country.isNotEmpty) "country": settings.country,
+    };

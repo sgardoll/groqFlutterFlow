@@ -7,72 +7,65 @@ import 'package:flutter/material.dart';
 // Begin custom action code
 // DO NOT REMOVE OR MODIFY THE CODE ABOVE!
 
-import 'package:groq/groq.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-// FlutterFlow Custom Action for Groq API with Agentic Tooling Support
-//
-// Agentic Tooling Models (built-in web search & code execution):
-// - "compound-beta": Multiple tool calls per request, higher capability
-// - "compound-beta-mini": Single tool call per request, 3x faster latency
-//
-// Standard Models (no built-in tools):
-// - "llama-3.3-70b-versatile": High performance general purpose
-// - "llama-3.1-70b-versatile": Versatile model for various tasks
-// - "llama-3.1-8b-instant": Fast lightweight model
-// - "gemma-7b-it": Lightweight instruction-tuned model
-// - "mixtral-8x7b-32768": Large context window model
-// - "kimi-k2-instruct": Advanced MoE model for agentic intelligence
+/// ADVANCED: Sends a user message (with optional prior chat history & search settings), returns GroqResponseStruct with tokens and executedTools if available.
+Future<GroqResponseStruct> sendGroqMessageAdvanced(
+  String message,
+  String apiKey,
+  String model,
+  List<String>? chatHistory,
+  SearchSettingsStruct? searchSettings,
+) async {
+  final url = Uri.parse('https://api.groq.com/openai/v1/chat/completions');
+  final headers = {
+    'Authorization': 'Bearer $apiKey',
+    'Content-Type': 'application/json',
+  };
 
-// MAIN ADVANCED FUNCTION: Returns GroqResponseStruct with full details
-Future<GroqResponseStruct> sendGroqMessageAdvanced(String message,
-    String apiKey, String model, List<String>? chatHistory) async {
-  // Provide default empty list if chatHistory is null
-  chatHistory ??= [];
+  // If chatHistory provided, include as previous user messages
+  final messages = [
+    if (chatHistory != null)
+      ...chatHistory.map((m) => {'role': 'user', 'content': m}),
+    {'role': 'user', 'content': message},
+  ];
+
+  final body = {
+    'model': model,
+    'messages': messages,
+    if (searchSettings != null) 'search_settings': _mapSettings(searchSettings),
+  };
 
   try {
-    final groq = Groq(
-      apiKey: apiKey,
-      model: model,
-    );
+    final res = await http.post(url, headers: headers, body: jsonEncode(body));
+    final decoded = jsonDecode(res.body);
 
-    groq.startChat();
-
-    // Build conversation context by sending history messages
-    // This maintains proper conversation flow
-    for (String previousMessage in chatHistory) {
-      try {
-        await groq.sendMessage(previousMessage);
-        // Note: We don't store the response as we're just building context
-      } catch (e) {
-        print('Warning: Failed to send chat history message: $e');
-        // Continue with remaining history even if one message fails
-      }
+    if (res.statusCode != 200) {
+      throw Exception(decoded['error']?['message'] ?? res.body.toString());
     }
 
-    // Send the current message
-    GroqResponse response = await groq.sendMessage(message);
+    final firstChoice = decoded['choices'][0];
+    final content = firstChoice['message']['content'] ?? "(empty)";
+    final executedTools = firstChoice['message']['executed_tools'];
 
-    // Validate response has choices before accessing
-    if (response.choices.isEmpty) {
-      throw Exception('No response choices returned from Groq API');
-    }
-
-    final firstChoice = response.choices.first;
-
-    // Create and return GroqResponseStruct
     return GroqResponseStruct(
-      content: firstChoice.message.content,
-      modelUsed: response.model,
-      promptTokens: response.usage.promptTokens,
-      completionTokens: response.usage.completionTokens,
-      totalTokens: response.usage.totalTokens,
+      content: content,
+      modelUsed: decoded['model'],
+      promptTokens: decoded['usage']?['prompt_tokens'] ?? 0,
+      completionTokens: decoded['usage']?['completion_tokens'] ?? 0,
+      totalTokens: decoded['usage']?['total_tokens'] ?? 0,
       timestamp: DateTime.now().toIso8601String(),
       isAgenticModel: _isAgenticModel(model),
       success: true,
       errorMessage: '',
+      executedTools: executedTools == null
+          ? []
+          : (executedTools is List
+              ? executedTools.map((e) => e.toString()).toList()
+              : [executedTools.toString()]),
     );
   } catch (e) {
-    print('Error with Groq API: $e');
     return GroqResponseStruct(
       content: '',
       modelUsed: model,
@@ -82,63 +75,21 @@ Future<GroqResponseStruct> sendGroqMessageAdvanced(String message,
       timestamp: DateTime.now().toIso8601String(),
       isAgenticModel: _isAgenticModel(model),
       success: false,
-      errorMessage: 'Unable to get response from Groq API: ${e.toString()}',
+      errorMessage: 'Groq API error: ${e.toString()}',
+      executedTools: [],
     );
   }
 }
 
-// HELPER FUNCTION: Convert executed tools to List<String> for FlutterFlow compatibility
-// Note: Current Groq API v1.0.0 doesn't include executedTools in response
-// Keeping this function for future API versions that may include tool execution
-List<String> _convertToolsToStringList(dynamic executedTools) {
-  if (executedTools == null) return <String>[];
+Map<String, dynamic> _mapSettings(SearchSettingsStruct settings) => {
+      if (settings.excludeDomains.isNotEmpty)
+        "exclude_domains": settings.excludeDomains,
+      if (settings.includeDomains.isNotEmpty)
+        "include_domains": settings.includeDomains,
+      if (settings.country.isNotEmpty) "country": settings.country,
+    };
 
-  try {
-    if (executedTools is List) {
-      return executedTools.map((tool) => tool.toString()).toList();
-    } else {
-      return [executedTools.toString()];
-    }
-  } catch (e) {
-    print('Error converting tools to string list: $e');
-    return <String>[];
-  }
-}
-
-// UTILITY FUNCTION: Get recommended model based on use case
-String getRecommendedModel(String useCase) {
-  switch (useCase.toLowerCase()) {
-    case 'research':
-    case 'current_events':
-    case 'web_search':
-      return 'compound-beta';
-    case 'calculation':
-    case 'math':
-    case 'code':
-      return 'compound-beta-mini';
-    case 'chat':
-    case 'conversation':
-      return 'llama-3.3-70b-versatile';
-    case 'fast':
-    case 'quick':
-      return 'llama-3.1-8b-instant';
-    case 'vision':
-    case 'image':
-      return 'llama-3.2-11b-vision-preview';
-    case 'agentic':
-    case 'tools':
-      return 'kimi-k2-instruct';
-    default:
-      return 'llama-3.3-70b-versatile';
-  }
-}
-
-// HELPER FUNCTION: Check if model supports agentic tooling
-bool _isAgenticModel(String model) {
-  const agenticModels = {
-    'compound-beta',
-    'compound-beta-mini',
-    'kimi-k2-instruct',
-  };
-  return agenticModels.contains(model);
-}
+bool _isAgenticModel(String model) => const {
+      'compound-beta',
+      'compound-beta-mini',
+    }.contains(model);
