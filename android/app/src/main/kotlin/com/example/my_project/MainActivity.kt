@@ -1,4 +1,4 @@
-package com.mycompany.groqaiagent
+package com.mycompany.groqagentictools
 
 import io.flutter.embedding.android.FlutterActivity
 
