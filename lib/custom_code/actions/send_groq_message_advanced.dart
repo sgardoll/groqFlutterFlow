@@ -9,6 +9,22 @@ import 'package:flutter/material.dart';
 
 import 'package:groq/groq.dart';
 
+
+// FlutterFlow Custom Action for Groq API with Agentic Tooling Support
+// 
+// Agentic Tooling Models (built-in web search & code execution):
+// - "compound-beta": Multiple tool calls per request, higher capability
+// - "compound-beta-mini": Single tool call per request, 3x faster latency
+//
+// Standard Models (no built-in tools):
+// - "llama-3.3-70b-versatile": High performance general purpose
+// - "llama-3.1-70b-versatile": Versatile model for various tasks
+// - "llama-3.1-8b-instant": Fast lightweight model
+// - "gemma-7b-it": Lightweight instruction-tuned model
+// - "mixtral-8x7b-32768": Large context window model
+// - "kimi-k2-instruct": Advanced MoE model for agentic intelligence
+
+
 // MAIN ADVANCED FUNCTION: Returns GroqResponseStruct with full details
 Future<GroqResponseStruct> sendGroqMessageAdvanced(String message,
     String apiKey, String model, List<String>? chatHistory) async {
