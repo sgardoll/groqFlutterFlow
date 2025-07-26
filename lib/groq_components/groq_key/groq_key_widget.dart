@@ -8,8 +8,6 @@ import 'package:provider/provider.dart';
 import 'groq_key_model.dart';
 export 'groq_key_model.dart';
 
-/// Create a component for a small popup window where you can enter your api
-/// key from https://console.groq.com/keys
 class GroqKeyWidget extends StatefulWidget {
   const GroqKeyWidget({super.key});
 
@@ -53,7 +51,7 @@ class _GroqKeyWidgetState extends State<GroqKeyWidget> {
         alignment: AlignmentDirectional(0.0, 0.0),
         child: Container(
           width: 320.0,
-          height: 240.0,
+          height: 263.5,
           decoration: BoxDecoration(
             color: FlutterFlowTheme.of(context).secondaryBackground,
             boxShadow: [
@@ -73,13 +71,14 @@ class _GroqKeyWidgetState extends State<GroqKeyWidget> {
             padding: EdgeInsetsDirectional.fromSTEB(20.0, 20.0, 20.0, 20.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Enter API Key',
+                      'Enter Groq API Key',
                       style: FlutterFlowTheme.of(context).titleMedium.override(
                             font: GoogleFonts.interTight(
                               fontWeight: FlutterFlowTheme.of(context)
@@ -98,10 +97,27 @@ class _GroqKeyWidgetState extends State<GroqKeyWidget> {
                                 .fontStyle,
                           ),
                     ),
-                    Text(
-                      'Get your API key from console.groq.com/keys',
-                      style: FlutterFlowTheme.of(context).bodySmall.override(
-                            font: GoogleFonts.inter(
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () async {
+                        await launchURL('https://console.groq.com/keys');
+                      },
+                      child: Text(
+                        'Get your API key from console.groq.com/keys',
+                        style: FlutterFlowTheme.of(context).bodySmall.override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .bodySmall
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .bodySmall
+                                    .fontStyle,
+                              ),
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              letterSpacing: 0.0,
                               fontWeight: FlutterFlowTheme.of(context)
                                   .bodySmall
                                   .fontWeight,
@@ -109,15 +125,7 @@ class _GroqKeyWidgetState extends State<GroqKeyWidget> {
                                   .bodySmall
                                   .fontStyle,
                             ),
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            letterSpacing: 0.0,
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodySmall
-                                .fontStyle,
-                          ),
+                      ),
                     ),
                   ].divide(SizedBox(height: 8.0)),
                 ),
@@ -125,26 +133,6 @@ class _GroqKeyWidgetState extends State<GroqKeyWidget> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'API Key',
-                      style: FlutterFlowTheme.of(context).labelMedium.override(
-                            font: GoogleFonts.inter(
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .fontStyle,
-                            ),
-                            letterSpacing: 0.0,
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .labelMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .labelMedium
-                                .fontStyle,
-                          ),
-                    ),
                     TextFormField(
                       controller: _model.textController,
                       focusNode: _model.textFieldFocusNode,
@@ -152,25 +140,27 @@ class _GroqKeyWidgetState extends State<GroqKeyWidget> {
                       textInputAction: TextInputAction.done,
                       obscureText: !_model.passwordVisibility,
                       decoration: InputDecoration(
-                        hintText: 'Enter your Groq API key',
-                        hintStyle:
-                            FlutterFlowTheme.of(context).bodyLarge.override(
-                                  font: GoogleFonts.inter(
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyLarge
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyLarge
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .bodyLarge
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyLarge
-                                      .fontStyle,
-                                ),
+                        hintText: 'gsk_',
+                        hintStyle: FlutterFlowTheme.of(context)
+                            .bodySmall
+                            .override(
+                              font: GoogleFonts.inter(
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .bodySmall
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .bodySmall
+                                    .fontStyle,
+                              ),
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              letterSpacing: 0.0,
+                              fontWeight: FlutterFlowTheme.of(context)
+                                  .bodySmall
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .bodySmall
+                                  .fontStyle,
+                            ),
                         enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: FlutterFlowTheme.of(context).alternate,

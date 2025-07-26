@@ -42,7 +42,10 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 
-
+	<key>NSCameraUsageDescription</key>
+    <string>In order to send images for AI analysis this app requires access to your camera</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>In order to send images for AI analysis this app requires access to your photo library</string>
 
 
 

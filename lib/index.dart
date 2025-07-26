@@ -1,2 +1,2 @@
 // Export pages
-export '/pages/demo/demo_widget.dart' show DemoWidget;
+export '/groq_pages/demo/demo_widget.dart' show DemoWidget;

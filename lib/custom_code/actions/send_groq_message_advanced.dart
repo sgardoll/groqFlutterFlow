@@ -10,13 +10,14 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// ADVANCED: Sends a user message (with optional prior chat history & search settings), returns GroqResponseStruct with tokens and executedTools if available.
+/// ADVANCED: Sends a user message (with optional prior chat history & search settings & image), returns GroqResponseStruct with tokens and executedTools if available.
 Future<GroqResponseStruct> sendGroqMessageAdvanced(
   String message,
   String apiKey,
   String model,
   List<String>? chatHistory,
   SearchSettingsStruct? searchSettings,
+  FFUploadedFile? imageFile,
 ) async {
   final url = Uri.parse('https://api.groq.com/openai/v1/chat/completions');
   final headers = {
@@ -24,11 +25,67 @@ Future<GroqResponseStruct> sendGroqMessageAdvanced(
     'Content-Type': 'application/json',
   };
 
+  // Extract base64 and format from FFUploadedFile if provided
+  String? imageBase64;
+  String? imageFormat;
+  if (imageFile != null) {
+    imageBase64 = base64Encode(imageFile.bytes ?? []);
+    imageFormat = _getImageFormat(imageFile.name ?? '');
+  }
+
+  // Validate image support for model
+  if (imageBase64 != null && !_supportsImages(model)) {
+    return GroqResponseStruct(
+      content: '',
+      modelUsed: model,
+      promptTokens: 0,
+      completionTokens: 0,
+      totalTokens: 0,
+      timestamp: DateTime.now().toIso8601String(),
+      isAgenticModel: _isAgenticModel(model),
+      success: false,
+      errorMessage:
+          'Model $model does not support image input. Only compound-beta and compound-beta-mini support images.',
+      executedTools: [],
+    );
+  }
+
+  // Validate image size (4MB limit for original file)
+  if (imageFile != null && (imageFile.bytes?.length ?? 0) > 4194304) {
+    // 4MB limit
+    return GroqResponseStruct(
+      content: '',
+      modelUsed: model,
+      promptTokens: 0,
+      completionTokens: 0,
+      totalTokens: 0,
+      timestamp: DateTime.now().toIso8601String(),
+      isAgenticModel: _isAgenticModel(model),
+      success: false,
+      errorMessage: 'Image size exceeds 4MB limit. Please use a smaller image.',
+      executedTools: [],
+    );
+  }
+
   // If chatHistory provided, include as previous user messages
   final messages = [
     if (chatHistory != null)
       ...chatHistory.map((m) => {'role': 'user', 'content': m}),
-    {'role': 'user', 'content': message},
+    {
+      'role': 'user',
+      'content': imageBase64 != null
+          ? [
+              {'type': 'text', 'text': message},
+              {
+                'type': 'image_url',
+                'image_url': {
+                  'url':
+                      'data:image/${imageFormat ?? 'jpeg'};base64,$imageBase64'
+                }
+              }
+            ]
+          : message
+    },
   ];
 
   final body = {
@@ -93,3 +150,25 @@ bool _isAgenticModel(String model) => const {
       'compound-beta',
       'compound-beta-mini',
     }.contains(model);
+
+bool _supportsImages(String model) => const {
+      'compound-beta',
+      'compound-beta-mini',
+    }.contains(model);
+
+String _getImageFormat(String filename) {
+  final extension = filename.toLowerCase().split('.').last;
+  switch (extension) {
+    case 'jpg':
+    case 'jpeg':
+      return 'jpeg';
+    case 'png':
+      return 'png';
+    case 'gif':
+      return 'gif';
+    case 'webp':
+      return 'webp';
+    default:
+      return 'jpeg'; // Default fallback
+  }
+}
