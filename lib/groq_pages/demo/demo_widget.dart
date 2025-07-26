@@ -52,35 +52,35 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
           MoveEffect(
             curve: Curves.easeInOutQuint,
             delay: 0.0.ms,
-            duration: 900.0.ms,
+            duration: 1200.0.ms,
             begin: Offset(100.0, 100.0),
             end: Offset(0.0, 0.0),
           ),
           RotateEffect(
             curve: Curves.easeInOutQuint,
             delay: 0.0.ms,
-            duration: 900.0.ms,
-            begin: 0.05,
+            duration: 1200.0.ms,
+            begin: 0.55,
             end: -0.03,
           ),
           ScaleEffect(
             curve: Curves.easeInOutQuint,
             delay: 0.0.ms,
-            duration: 900.0.ms,
-            begin: Offset(0.0, 0.0),
+            duration: 1200.0.ms,
+            begin: Offset(0.2, 0.2),
             end: Offset(1.0, 1.0),
           ),
           MoveEffect(
             curve: Curves.easeInOutQuint,
             delay: 0.0.ms,
-            duration: 900.0.ms,
+            duration: 1200.0.ms,
             begin: Offset(0.0, 0.0),
             end: Offset(0.0, 0.0),
           ),
           FadeEffect(
             curve: Curves.easeInOut,
             delay: 0.0.ms,
-            duration: 900.0.ms,
+            duration: 1200.0.ms,
             begin: 0.0,
             end: 1.0,
           ),
@@ -213,7 +213,7 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
                         width: double.infinity,
                         decoration: BoxDecoration(),
                         child: Stack(
-                          alignment: AlignmentDirectional(0.0, 1.0),
+                          alignment: AlignmentDirectional(1.0, 1.0),
                           children: [
                             if (valueOrDefault<bool>(
                               _model.uploadedLocalFile_uploadedPhoto != null &&
@@ -226,12 +226,15 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
                                 alignment: AlignmentDirectional(1.0, 1.0),
                                 child: Padding(
                                   padding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 80.0, 24.0),
+                                      0.0, 0.0, 0.0, 24.0),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12.0),
                                     child: Container(
-                                      width: 150.0,
-                                      height: 100.0,
+                                      height: 75.0,
+                                      constraints: BoxConstraints(
+                                        minWidth: 75.0,
+                                        maxWidth: 120.0,
+                                      ),
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
                                           colors: [
