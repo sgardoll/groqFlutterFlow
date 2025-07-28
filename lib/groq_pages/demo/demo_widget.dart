@@ -3,16 +3,13 @@ import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/upload_data.dart';
 import '/groq_components/groq_key/groq_key_widget.dart';
 import '/groq_components/model_selector/model_selector_widget.dart';
-import 'dart:math';
-import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
+import '/custom_code/groq_model_registry.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -109,10 +106,10 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
-          backgroundColor: FlutterFlowTheme.of(context).primary,
+          backgroundColor: FlutterFlowTheme.of(context).darkMutedColor,
           automaticallyImplyLeading: false,
           title: Text(
-            'Groq Agentic Model Selection',
+            'Groq Agentic Model Demo',
             style: FlutterFlowTheme.of(context).titleMedium.override(
                   font: GoogleFonts.interTight(
                     fontWeight:
@@ -120,7 +117,7 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
                     fontStyle:
                         FlutterFlowTheme.of(context).titleMedium.fontStyle,
                   ),
-                  color: FlutterFlowTheme.of(context).primaryBackground,
+                  color: FlutterFlowTheme.of(context).info,
                   letterSpacing: 0.0,
                   fontWeight:
                       FlutterFlowTheme.of(context).titleMedium.fontWeight,
@@ -132,7 +129,6 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
               builder: (context) => FlutterFlowIconButton(
                 borderRadius: 8.0,
                 buttonSize: 50.0,
-                fillColor: FlutterFlowTheme.of(context).primary,
                 icon: Icon(
                   Icons.key_rounded,
                   color: FlutterFlowTheme.of(context).info,
@@ -177,7 +173,7 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Flexible(
+              Expanded(
                 child: Container(
                   decoration: BoxDecoration(),
                   child: wrapWithModel(
@@ -216,8 +212,7 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
                           alignment: AlignmentDirectional(1.0, 1.0),
                           children: [
                             if (valueOrDefault<bool>(
-                              _model.uploadedLocalFile_uploadedPhoto != null &&
-                                  (_model.uploadedLocalFile_uploadedPhoto.bytes
+                              (_model.uploadedLocalFile_uploadedPhoto.bytes
                                           ?.isNotEmpty ??
                                       false),
                               false,
@@ -236,16 +231,18 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
                                         maxWidth: 120.0,
                                       ),
                                       decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Colors.transparent,
-                                            Color(0x8814181B)
-                                          ],
-                                          stops: [0.0, 1.0],
-                                          begin:
-                                              AlignmentDirectional(0.0, -1.0),
-                                          end: AlignmentDirectional(0, 1.0),
-                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            blurRadius: 6.0,
+                                            color: FlutterFlowTheme.of(context)
+                                                .darkMutedColor,
+                                            offset: Offset(
+                                              -2.0,
+                                              -2.0,
+                                            ),
+                                            spreadRadius: 6.0,
+                                          )
+                                        ],
                                         borderRadius:
                                             BorderRadius.circular(12.0),
                                         border: Border.all(
@@ -390,10 +387,11 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
                                     hoverColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
                                     onLongPress: () async {
-                                      if ((_model.modelSelected ==
-                                              'compound-beta') ||
-                                          (_model.modelSelected ==
-                                              'compound-beta-mini')) {
+                                      if (GroqModelRegistry
+                                              .getMultiModalModels()
+                                          .contains(GroqModelStruct(
+                                        name: _model.modelSelected,
+                                      ))) {
                                         final selectedMedia =
                                             await selectMediaWithSourceBottomSheet(
                                           context: context,
@@ -455,8 +453,8 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
                                       borderRadius: 12.0,
                                       borderWidth: 1.0,
                                       buttonSize: 50.0,
-                                      fillColor:
-                                          FlutterFlowTheme.of(context).primary,
+                                      fillColor: FlutterFlowTheme.of(context)
+                                          .darkMutedColor,
                                       icon: Icon(
                                         Icons.send_rounded,
                                         color: FlutterFlowTheme.of(context)
@@ -465,10 +463,11 @@ class _DemoWidgetState extends State<DemoWidget> with TickerProviderStateMixin {
                                       ),
                                       showLoadingIndicator: true,
                                       onPressed: () async {
-                                        if ((_model.modelSelected ==
-                                                'combined-beta') ||
-                                            (_model.modelSelected ==
-                                                'combined-beta-mini')) {
+                                        if (GroqModelRegistry
+                                                .getMultiModalModels()
+                                            .contains(GroqModelStruct(
+                                          name: _model.modelSelected,
+                                        ))) {
                                           _model.groqResponseAgentic =
                                               await actions
                                                   .sendGroqMessageAdvanced(
