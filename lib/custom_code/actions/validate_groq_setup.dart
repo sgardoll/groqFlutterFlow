@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../groq_model_registry.dart' show GroqModelRegistry;
 
 /// VALIDATION FUNCTION: Test API setup and return validation result
 Future<GroqResponseStruct> validateGroqSetup(
@@ -41,6 +42,9 @@ Future<GroqResponseStruct> validateGroqSetup(
     final content = firstChoice['message']['content'] ?? "(empty)";
     final executedTools = firstChoice['message']['executed_tools'];
 
+    final modelStruct = GroqModelRegistry.getModelByName(model) ??
+        GroqModelRegistry.getModelById(model);
+
     return GroqResponseStruct(
       content: 'Setup validated successfully. Test response: $content',
       modelUsed: decoded['model'],
@@ -48,7 +52,7 @@ Future<GroqResponseStruct> validateGroqSetup(
       completionTokens: decoded['usage']?['completion_tokens'] ?? 0,
       totalTokens: decoded['usage']?['total_tokens'] ?? 0,
       timestamp: DateTime.now().toIso8601String(),
-      isAgenticModel: _isAgenticModel(model),
+      isAgenticModel: modelStruct?.isAgentic ?? false,
       success: true,
       errorMessage: '',
       executedTools: executedTools == null
@@ -58,6 +62,9 @@ Future<GroqResponseStruct> validateGroqSetup(
               : [executedTools.toString()]),
     );
   } catch (e) {
+    final modelStruct = GroqModelRegistry.getModelByName(model) ??
+        GroqModelRegistry.getModelById(model);
+
     return GroqResponseStruct(
       content: '',
       modelUsed: model,
@@ -65,7 +72,7 @@ Future<GroqResponseStruct> validateGroqSetup(
       completionTokens: 0,
       totalTokens: 0,
       timestamp: DateTime.now().toIso8601String(),
-      isAgenticModel: _isAgenticModel(model),
+      isAgenticModel: modelStruct?.isAgentic ?? false,
       success: false,
       errorMessage: 'Setup validation failed: ${e.toString()}',
       executedTools: [],
@@ -80,8 +87,3 @@ Map<String, dynamic> _mapSettings(SearchSettingsStruct settings) => {
         "include_domains": settings.includeDomains,
       if (settings.country.isNotEmpty) "country": settings.country,
     };
-
-bool _isAgenticModel(String model) => const {
-      'compound-beta',
-      'compound-beta-mini',
-    }.contains(model);

@@ -1,10 +1,11 @@
+import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
+import '/flutter_flow/form_field_controller.dart';
+import '/custom_code/groq_model_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'model_selector_model.dart';
 export 'model_selector_model.dart';
 
@@ -85,7 +86,7 @@ class _ModelSelectorWidgetState extends State<ModelSelectorWidget> {
                       children: [
                         Icon(
                           Icons.search_rounded,
-                          color: FlutterFlowTheme.of(context).primary,
+                          color: FlutterFlowTheme.of(context).tertiary,
                           size: 28.0,
                         ),
                         Text(
@@ -149,21 +150,24 @@ class _ModelSelectorWidgetState extends State<ModelSelectorWidget> {
                             16.0, 0.0, 16.0, 0.0),
                         iconPadding:
                             EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: FlutterFlowTheme.of(context).accent1,
-                        textStyle:
-                            FlutterFlowTheme.of(context).labelMedium.override(
-                                  font: GoogleFonts.interTight(
-                                    fontWeight: FontWeight.w500,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontStyle,
-                                ),
+                        color: FlutterFlowTheme.of(context).lightMutedColor,
+                        textStyle: FlutterFlowTheme.of(context)
+                            .labelMedium
+                            .override(
+                              font: GoogleFonts.interTight(
+                                fontWeight: FontWeight.w500,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontStyle,
+                              ),
+                              color:
+                                  FlutterFlowTheme.of(context).darkMutedColor,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w500,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontStyle,
+                            ),
                         elevation: 0.0,
                         borderRadius: BorderRadius.circular(12.0),
                         hoverColor: FlutterFlowTheme.of(context).primary,
@@ -205,7 +209,7 @@ class _ModelSelectorWidgetState extends State<ModelSelectorWidget> {
                       children: [
                         Icon(
                           Icons.calculate_rounded,
-                          color: FlutterFlowTheme.of(context).secondary,
+                          color: FlutterFlowTheme.of(context).tertiary,
                           size: 28.0,
                         ),
                         Text(
@@ -270,21 +274,24 @@ class _ModelSelectorWidgetState extends State<ModelSelectorWidget> {
                             16.0, 0.0, 16.0, 0.0),
                         iconPadding:
                             EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: FlutterFlowTheme.of(context).accent1,
-                        textStyle:
-                            FlutterFlowTheme.of(context).labelMedium.override(
-                                  font: GoogleFonts.interTight(
-                                    fontWeight: FontWeight.w500,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w500,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .fontStyle,
-                                ),
+                        color: FlutterFlowTheme.of(context).lightMutedColor,
+                        textStyle: FlutterFlowTheme.of(context)
+                            .labelMedium
+                            .override(
+                              font: GoogleFonts.interTight(
+                                fontWeight: FontWeight.w500,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .labelMedium
+                                    .fontStyle,
+                              ),
+                              color:
+                                  FlutterFlowTheme.of(context).darkMutedColor,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.w500,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .labelMedium
+                                  .fontStyle,
+                            ),
                         elevation: 0.0,
                         borderRadius: BorderRadius.circular(12.0),
                         hoverColor: FlutterFlowTheme.of(context).primary,
@@ -376,44 +383,70 @@ class _ModelSelectorWidgetState extends State<ModelSelectorWidget> {
                                 .fontStyle,
                           ),
                     ),
-                    FFButtonWidget(
-                      onPressed: () async {
+                    FlutterFlowDropDown<String>(
+                      controller: _model.dropDownValueController ??=
+                          FormFieldController<String>(
+                        _model.dropDownValue ??= 'llama-3.3-70b-versatile',
+                      ),
+                      options:
+                          List<String>.from(GroqModelRegistry.getAllModels()
+                              .map((e) => valueOrDefault<String>(
+                                    e.name,
+                                    'llama-3.3-70b-versatile',
+                                  ))
+                              .toList()),
+                      optionLabels: GroqModelRegistry.getAllModels()
+                          .map((e) => valueOrDefault<String>(
+                                e.displayName,
+                                'Model: llama-3.3-70b-versatile',
+                              ))
+                          .toList(),
+                      onChanged: (val) async {
+                        safeSetState(() => _model.dropDownValue = val);
                         await widget.onModelSelected?.call(
-                          'llama-3.3-70b-versatile',
+                          valueOrDefault<String>(
+                            _model.dropDownValue,
+                            'llama-3.3-70b-versatile',
+                          ),
                         );
                       },
-                      text: 'Model: llama-3.3-70b-versatile',
-                      options: FFButtonOptions(
-                        width: MediaQuery.sizeOf(context).width * 1.0,
-                        height: 32.0,
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                            16.0, 0.0, 16.0, 0.0),
-                        iconPadding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: FlutterFlowTheme.of(context).accent1,
-                        textStyle:
-                            FlutterFlowTheme.of(context).labelMedium.override(
-                                  font: GoogleFonts.interTight(
-                                    fontWeight: FontWeight.w500,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                  ),
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.w500,
+                      height: 32.0,
+                      textStyle:
+                          FlutterFlowTheme.of(context).bodyMedium.override(
+                                font: GoogleFonts.inter(
+                                  fontWeight: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontWeight,
                                   fontStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
+                                      .bodyMedium
                                       .fontStyle,
                                 ),
-                        elevation: 0.0,
-                        borderRadius: BorderRadius.circular(12.0),
-                        hoverColor: FlutterFlowTheme.of(context).primary,
-                        hoverBorderSide: BorderSide(
-                          color: FlutterFlowTheme.of(context).alternate,
-                        ),
-                        hoverTextColor:
-                            FlutterFlowTheme.of(context).secondaryBackground,
+                                letterSpacing: 0.0,
+                                fontWeight: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontWeight,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .fontStyle,
+                              ),
+                      hintText: 'Model: llama-3.3-70b-versatile',
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: FlutterFlowTheme.of(context).secondaryText,
+                        size: 24.0,
                       ),
+                      fillColor:
+                          FlutterFlowTheme.of(context).secondaryBackground,
+                      elevation: 2.0,
+                      borderColor: FlutterFlowTheme.of(context).alternate,
+                      borderWidth: 2.0,
+                      borderRadius: 12.0,
+                      margin:
+                          EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                      hidesUnderline: true,
+                      isOverButton: false,
+                      isSearchable: false,
+                      isMultiSelect: false,
                     ),
                   ].divide(SizedBox(height: 8.0)),
                 ),

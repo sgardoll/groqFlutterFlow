@@ -1,22 +1,8 @@
 import '/backend/schema/structs/index.dart';
-import '/flutter_flow/flutter_flow_animations.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/upload_data.dart';
-import '/groq_components/groq_key/groq_key_widget.dart';
 import '/groq_components/model_selector/model_selector_widget.dart';
-import 'dart:math';
-import 'dart:ui';
-import '/custom_code/actions/index.dart' as actions;
 import 'demo_widget.dart' show DemoWidget;
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class DemoModel extends FlutterFlowModel<DemoWidget> {
   ///  Local state fields for this page.

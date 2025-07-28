@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../groq_model_registry.dart';
 
 /// ADVANCED: Sends a user message (with optional prior chat history & search settings & image), returns GroqResponseStruct with tokens and executedTools if available.
 Future<GroqResponseStruct> sendGroqMessageAdvanced(
@@ -35,6 +36,11 @@ Future<GroqResponseStruct> sendGroqMessageAdvanced(
 
   // Validate image support for model
   if (imageBase64 != null && !_supportsImages(model)) {
+    final multiModalModels = GroqModelRegistry.getMultiModalModels()
+        .map((m) => m!.displayName)
+        .join(', ');
+    final modelStruct = GroqModelRegistry.getModelByName(model) ??
+        GroqModelRegistry.getModelById(model);
     return GroqResponseStruct(
       content: '',
       modelUsed: model,
@@ -42,29 +48,36 @@ Future<GroqResponseStruct> sendGroqMessageAdvanced(
       completionTokens: 0,
       totalTokens: 0,
       timestamp: DateTime.now().toIso8601String(),
-      isAgenticModel: _isAgenticModel(model),
+      isAgenticModel: modelStruct?.isAgentic ?? false,
       success: false,
       errorMessage:
-          'Model $model does not support image input. Only compound-beta and compound-beta-mini support images.',
+          'Model $model does not support image input. Available multi-modal models: $multiModalModels',
       executedTools: [],
     );
   }
 
-  // Validate image size (4MB limit for original file)
-  if (imageFile != null && (imageFile.bytes?.length ?? 0) > 4194304) {
-    // 4MB limit
-    return GroqResponseStruct(
-      content: '',
-      modelUsed: model,
-      promptTokens: 0,
-      completionTokens: 0,
-      totalTokens: 0,
-      timestamp: DateTime.now().toIso8601String(),
-      isAgenticModel: _isAgenticModel(model),
-      success: false,
-      errorMessage: 'Image size exceeds 4MB limit. Please use a smaller image.',
-      executedTools: [],
-    );
+  // Validate image size based on model specifications
+  if (imageFile != null) {
+    final modelStruct = GroqModelRegistry.getModelByName(model) ??
+        GroqModelRegistry.getModelById(model);
+    final maxSizeMb = modelStruct?.maxImageSizeMb ?? 4;
+    final maxSizeBytes = maxSizeMb * 1024 * 1024;
+
+    if ((imageFile.bytes?.length ?? 0) > maxSizeBytes) {
+      return GroqResponseStruct(
+        content: '',
+        modelUsed: model,
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0,
+        timestamp: DateTime.now().toIso8601String(),
+        isAgenticModel: modelStruct?.isAgentic ?? false,
+        success: false,
+        errorMessage:
+            'Image size exceeds ${maxSizeMb}MB limit for model $model. Please use a smaller image.',
+        executedTools: [],
+      );
+    }
   }
 
   // If chatHistory provided, include as previous user messages
@@ -106,6 +119,9 @@ Future<GroqResponseStruct> sendGroqMessageAdvanced(
     final content = firstChoice['message']['content'] ?? "(empty)";
     final executedTools = firstChoice['message']['executed_tools'];
 
+    final modelStruct = GroqModelRegistry.getModelByName(model) ??
+        GroqModelRegistry.getModelById(model);
+
     return GroqResponseStruct(
       content: content,
       modelUsed: decoded['model'],
@@ -113,7 +129,7 @@ Future<GroqResponseStruct> sendGroqMessageAdvanced(
       completionTokens: decoded['usage']?['completion_tokens'] ?? 0,
       totalTokens: decoded['usage']?['total_tokens'] ?? 0,
       timestamp: DateTime.now().toIso8601String(),
-      isAgenticModel: _isAgenticModel(model),
+      isAgenticModel: modelStruct?.isAgentic ?? false,
       success: true,
       errorMessage: '',
       executedTools: executedTools == null
@@ -123,6 +139,8 @@ Future<GroqResponseStruct> sendGroqMessageAdvanced(
               : [executedTools.toString()]),
     );
   } catch (e) {
+    final modelStruct = GroqModelRegistry.getModelByName(model) ??
+        GroqModelRegistry.getModelById(model);
     return GroqResponseStruct(
       content: '',
       modelUsed: model,
@@ -130,12 +148,16 @@ Future<GroqResponseStruct> sendGroqMessageAdvanced(
       completionTokens: 0,
       totalTokens: 0,
       timestamp: DateTime.now().toIso8601String(),
-      isAgenticModel: _isAgenticModel(model),
+      isAgenticModel: modelStruct?.isAgentic ?? false,
       success: false,
       errorMessage: 'Groq API error: ${e.toString()}',
       executedTools: [],
     );
   }
+}
+
+extension on Object {
+  get displayName => null;
 }
 
 Map<String, dynamic> _mapSettings(SearchSettingsStruct settings) => {
@@ -146,15 +168,11 @@ Map<String, dynamic> _mapSettings(SearchSettingsStruct settings) => {
       if (settings.country.isNotEmpty) "country": settings.country,
     };
 
-bool _isAgenticModel(String model) => const {
-      'compound-beta',
-      'compound-beta-mini',
-    }.contains(model);
-
-bool _supportsImages(String model) => const {
-      'compound-beta',
-      'compound-beta-mini',
-    }.contains(model);
+bool _supportsImages(String model) {
+  final modelStruct = GroqModelRegistry.getModelByName(model) ??
+      GroqModelRegistry.getModelById(model);
+  return modelStruct?.isMultiModal ?? false;
+}
 
 String _getImageFormat(String filename) {
   final extension = filename.toLowerCase().split('.').last;
